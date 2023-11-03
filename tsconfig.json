@@ -22,7 +22,7 @@
       "@/*": ["./*"]
     },
   },
-  "include": ["firebase.d.ts","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "pages/index.js"],
+  "include": ["firebase.d.ts","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "pages/index.ts"],
   "exclude": ["node_modules"],
   "types": ["firebase"]
 }

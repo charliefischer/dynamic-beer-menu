@@ -6,7 +6,7 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
 
 
 export default function Home() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     const db = getFirestore(firebase);
@@ -15,19 +15,24 @@ export default function Home() {
       const beersCol = collection(db, 'beer-volume');
       const beerSnapshot = await getDocs(beersCol);
       const beerList = beerSnapshot.docs.map(doc => doc.data());
-      console.log(beerList)
-      // return cityList;
+      setData(beerList)
     }
     getCities(db);
-
-    
   }, []);
 
   // const database = getDatabase(app);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>Hello World</div>
+      <div>{data.map(beerData => {
+        return (
+          <div key={beerData.beer}>
+          <div>{beerData.beer}</div>
+          <div>{beerData.volume}</div>
+
+          </div>
+        )
+      })}</div>
     </main>
   );
 }

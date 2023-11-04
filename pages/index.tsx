@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import firebase from "../firebase"; // Import your Firebase configuration
+import firebase from "../firebase";
+
 import {
-  getFirestore,
   collection,
   getDocs,
   query,
+  setDoc, doc
 } from "firebase/firestore/lite";
+
 import NumberOfPeople from "@/components/numberOfPeople";
 
 type BeerData = {
@@ -18,9 +20,28 @@ export default function Home() {
   const [data, setData] = useState<BeerData[]>([]);
   const [loading, setLoading] = useState<Boolean>(true);
   const [count, setCount] = useState<number>(50);
+  const [db, setDb] = useState<any>(null);
+
+
+  const writeToFirestore = async (path, id, data) => {
+    const doc1 = doc(db,id, path)
+    console.log(doc1)
+    try {
+      await setDoc(doc1, data);
+      console.log("Data written to Firestore successfully.");
+    } catch (error) {
+      console.error("Error writing data to Firestore:", error);
+    }
+  };
+  
 
   useEffect(() => {
-    const db = getFirestore(firebase);
+    setDb(firebase);
+  }, [])
+
+  useEffect(() => {
+    if(!db) return;
+
     async function getCities(db: any) {
       const beersCol = collection(db, "beer-volume");
       const q = query(beersCol);
@@ -32,8 +53,9 @@ export default function Home() {
       setVolume(parseInt(beerList[0].volume));
       setLoading(false);
     }
+
     getCities(db);
-  }, []);
+  }, [db]);
 
   const KEG_PRICE = 200;
   const PINTS_PER_KEG = 1000;
@@ -61,18 +83,17 @@ export default function Home() {
   };
 
   const delivery = () => {
-    setVolume(100);
+    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", {volume: 100});
   };
 
   const drink = () => {
     const pintsRemaining = PINTS_PER_KEG * (volume / 100);
     const afterDrunk = pintsRemaining - count;
-    const newVol = (afterDrunk / PINTS_PER_KEG) * 100;
-    if (newVol < 0) {
-      setVolume(0);
-    } else {
-      setVolume(Math.round(newVol));
-    }
+    let newVol = (afterDrunk / PINTS_PER_KEG) * 100;
+    newVol = newVol < 0 ? 0 : Math.round(newVol);  
+    setVolume(newVol);
+
+    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", {volume: newVol});
   };
 
   return (
@@ -103,7 +124,7 @@ export default function Home() {
                     value={volume}
                   />
                 </div>
-                <div>Cost per pint: {calculatePint(volume, day, 3, 12)}</div>
+                <div>Cost per pint: £{calculatePint(volume, day, 3, 12)}</div>
               </div>
             );
           })}

@@ -5,10 +5,12 @@ import {
   collection,
   getDocs,
   query,
-  setDoc, doc
+  setDoc,
+  doc,
 } from "firebase/firestore/lite";
 
 import NumberOfPeople from "@/components/numberOfPeople";
+import DayOfTheWeek from "@/components/dayOfTheWeek";
 
 type BeerData = {
   beer: string;
@@ -22,10 +24,9 @@ export default function Home() {
   const [count, setCount] = useState<number>(50);
   const [db, setDb] = useState<any>(null);
 
-
   const writeToFirestore = async (path, id, data) => {
-    const doc1 = doc(db,id, path)
-    console.log(doc1)
+    const doc1 = doc(db, id, path);
+    console.log(doc1);
     try {
       await setDoc(doc1, data);
       console.log("Data written to Firestore successfully.");
@@ -33,14 +34,13 @@ export default function Home() {
       console.error("Error writing data to Firestore:", error);
     }
   };
-  
 
   useEffect(() => {
     setDb(firebase);
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if(!db) return;
+    if (!db) return;
 
     async function getCities(db: any) {
       const beersCol = collection(db, "beer-volume");
@@ -83,17 +83,17 @@ export default function Home() {
   };
 
   const delivery = () => {
-    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", {volume: 100});
+    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", { volume: 100 });
   };
 
   const drink = () => {
     const pintsRemaining = PINTS_PER_KEG * (volume / 100);
     const afterDrunk = pintsRemaining - count;
-    let newVol = (afterDrunk / PINTS_PER_KEG) * 100;
-    newVol = newVol < 0 ? 0 : Math.round(newVol);  
-    setVolume(newVol);
-
-    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", {volume: newVol});
+    const newVol =
+      afterDrunk / PINTS_PER_KEG < 0
+        ? 0
+        : Math.round((afterDrunk / PINTS_PER_KEG) * 100);
+    writeToFirestore("3HpH4K7rsEbN3VqZm1P4", "beer-volume", { volume: newVol });
   };
 
   return (
@@ -102,19 +102,10 @@ export default function Home() {
       {!loading && (
         <div>
           <NumberOfPeople count={count} setCount={setCount} />
-          <select
-            onChange={(e) => setDay(parseInt(e.target.value))}
-            value={day}
-          >
-            {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-              <option value={n} key={n}>
-                {DAYS_OF_WEEK[n]}day
-              </option>
-            ))}
-          </select>
-          {data.map((beerData) => {
+          <DayOfTheWeek days={DAYS_OF_WEEK} day={day} setDay={setDay} />
+          {data.map((beerData, i) => {
             return (
-              <div key={beerData.beer}>
+              <div key={i}>
                 <div>Beer: {beerData.beer}</div>
                 <div>
                   Beer Left: {volume.toString()}%{" "}

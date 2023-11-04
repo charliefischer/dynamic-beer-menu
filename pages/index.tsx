@@ -19,11 +19,10 @@ const DAYS_OF_WEEK = ["Mon", "Tues", "Wednes", "Thurs", "Fri", "Satur", "Sun"];
 export default function Home() {
   const [data, setData] = useState<BeerData[]>([]);
   const [loading, setLoading] = useState<Boolean>(true);
-  const [count, setCount] = useState(50);
+  const [count, setCount] = useState<number>(50);
 
   useEffect(() => {
     const db = getFirestore(firebase);
-    console.log(db);
     async function getCities(db: any) {
       const beersCol = collection(db, "beer-volume");
       const q = query(beersCol);
@@ -51,18 +50,24 @@ export default function Home() {
     if (!volume) return "Sold Out";
     let priceMultiplier = 1;
     let basePrice = (maxPrice - minPrice) * (1 - vol / 100) + minPrice;
-    if (day >= 4) {
-      priceMultiplier = 1.15;
+    if (day >= 4 && day < 6) {
+      priceMultiplier *= 1.15;
     }
     if (day === 0 || day === 6) {
-      priceMultiplier = 0.9;
+      priceMultiplier *= 0.9;
+    }
+    if(count > 250){
+      priceMultiplier *= 1.1
     }
     return (basePrice * priceMultiplier).toFixed(2);
   };
 
+  const delivery = () => {
+    setVolume(100);
+  }
+
   const drink = () => {
     const pintsRemaining = PINTS_PER_KEG * (volume / 100);
-    console.log(pintsRemaining - count)
     const afterDrunk = pintsRemaining - count
     const newVol = afterDrunk / PINTS_PER_KEG * 100
     if(newVol < 0) {
@@ -107,6 +112,7 @@ export default function Home() {
         </div>
       )}
       <button onClick={drink}>Drink</button>
+      <button onClick={delivery}>Delivery</button>
     </main>
   );
 }

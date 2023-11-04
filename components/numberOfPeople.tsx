@@ -1,8 +1,6 @@
-import { useState } from "react"
-
-export default function NumberOfPeople(){
-  const [count, setCount] = useState(50);
-  const updateCount = (e) => {
+export default function NumberOfPeople({count, setCount}){
+  
+  const updateCount = (e: any) => {
     setCount(e.target.value)
   }
   return (

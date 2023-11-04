@@ -15,9 +15,11 @@ type BeerData = {
   volume: string;
 };
 
+const DAYS_OF_WEEK = ["Mon", "Tues", "Wednes", "Thurs", "Fri", "Satur", "Sun"];
 export default function Home() {
   const [data, setData] = useState<BeerData[]>([]);
   const [loading, setLoading] = useState<Boolean>(true);
+  const [count, setCount] = useState(50);
 
   useEffect(() => {
     const db = getFirestore(firebase);
@@ -30,17 +32,44 @@ export default function Home() {
         (doc) => doc.data() as BeerData
       );
       setData(beerList);
+      setVolume(parseInt(beerList[0].volume));
       setLoading(false);
     }
     getCities(db);
   }, []);
 
   const KEG_PRICE = 200;
-  const PINTS_PER_KEG = 55;
-  const [volume, setVolume] = useState<Number>(0);
-  const calculatePint = (vol: Number, minPrice = 5, maxPrice = 10) => {
-    if(!volume) return "Sold Out";
-    return (maxPrice - minPrice) * (1 - vol / 100) + minPrice;
+  const PINTS_PER_KEG = 1000;
+  const [day, setDay] = useState<number>(2);
+  const [volume, setVolume] = useState<number>(0);
+  const calculatePint = (
+    vol: number,
+    day: number,
+    minPrice = 5,
+    maxPrice = 10
+  ) => {
+    if (!volume) return "Sold Out";
+    let priceMultiplier = 1;
+    let basePrice = (maxPrice - minPrice) * (1 - vol / 100) + minPrice;
+    if (day >= 4) {
+      priceMultiplier = 1.15;
+    }
+    if (day == (0 || 6)) {
+      priceMultiplier = 0.9;
+    }
+    return (basePrice * priceMultiplier).toFixed(2);
+  };
+
+  const drink = () => {
+    const pintsRemaining = PINTS_PER_KEG * (volume / 100);
+    console.log(pintsRemaining - count)
+    const afterDrunk = pintsRemaining - count
+    const newVol = afterDrunk / PINTS_PER_KEG * 100
+    if(newVol < 0) {
+      setVolume(0)
+    } else {
+      setVolume(Math.round(newVol));
+    }
   };
 
   return (
@@ -48,21 +77,36 @@ export default function Home() {
       {loading && <div>Loading</div>}
       {!loading && (
         <div>
-          <NumberOfPeople />
+          <NumberOfPeople count={count} setCount={setCount} />
+          <select
+            onChange={(e) => setDay(parseInt(e.target.value))}
+            value={day}
+          >
+            {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+              <option value={n} key={n}>
+                {DAYS_OF_WEEK[n]}day
+              </option>
+            ))}
+          </select>
           {data.map((beerData) => {
             return (
               <div key={beerData.beer}>
                 <div>Beer: {beerData.beer}</div>
-                <div>Beer Left: {volume.toString()}% <input type="range" onChange={(e) => setVolume(e.target.value)} /></div>
                 <div>
-                  Cost per pint:{" "}
-                  {calculatePint(volume, 3, 12)}
+                  Beer Left: {volume.toString()}%{" "}
+                  <input
+                    type="range"
+                    onChange={(e) => setVolume(parseInt(e.target.value))}
+                    value={volume}
+                  />
                 </div>
+                <div>Cost per pint: {calculatePint(volume, day, 3, 12)}</div>
               </div>
             );
           })}
         </div>
       )}
+      <button onClick={drink}>Drink</button>
     </main>
   );
 }

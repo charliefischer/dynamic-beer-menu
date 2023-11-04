@@ -1,5 +1,3 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
 import { useEffect, useState } from "react";
 import firebase from "../firebase"; // Import your Firebase configuration
 import {
@@ -56,22 +54,22 @@ export default function Home() {
     if (day === 0 || day === 6) {
       priceMultiplier *= 0.9;
     }
-    if(count > 250){
-      priceMultiplier *= 1.1
+    if (count > 250) {
+      priceMultiplier *= 1.1;
     }
     return (basePrice * priceMultiplier).toFixed(2);
   };
 
   const delivery = () => {
     setVolume(100);
-  }
+  };
 
   const drink = () => {
     const pintsRemaining = PINTS_PER_KEG * (volume / 100);
-    const afterDrunk = pintsRemaining - count
-    const newVol = afterDrunk / PINTS_PER_KEG * 100
-    if(newVol < 0) {
-      setVolume(0)
+    const afterDrunk = pintsRemaining - count;
+    const newVol = (afterDrunk / PINTS_PER_KEG) * 100;
+    if (newVol < 0) {
+      setVolume(0);
     } else {
       setVolume(Math.round(newVol));
     }

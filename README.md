@@ -20,3 +20,8 @@ pnpm dev
 # or
 bun dev
 ```
+
+## To Do:
+- [ ] the time of day should affect the beer. A pint at 2pm? Should be giving those away.
+- [ ] the functions should directly impact the data in Firebase not just change local variables. Refresh the page you're back at square one
+- [ ] the functionality should extend beyond lager. Other than a hot summers day I'm going to swerve that one.

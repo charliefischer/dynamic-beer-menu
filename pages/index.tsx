@@ -54,7 +54,7 @@ export default function Home() {
     if (day >= 4) {
       priceMultiplier = 1.15;
     }
-    if (day == (0 || 6)) {
+    if (day === 0 || day === 6) {
       priceMultiplier = 0.9;
     }
     return (basePrice * priceMultiplier).toFixed(2);
